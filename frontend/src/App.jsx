@@ -102,9 +102,11 @@ function App() {
 
   // Stats calculation
   const totalSpots = parkings.reduce((acc, curr) => acc + (curr.grp_exploitation || 0), 0);
-  const totalAvailable = parkings.reduce((acc, curr) => acc + (curr.grp_dispo || 0), 0);
+  const totalAvailable = parkings.reduce((acc, curr) => acc + (curr.grp_disponible || 0), 0);
   const openCount = parkings.filter(p => getStatusInfo(p.grp_statut).class === 'ouvert').length;
 
+
+  
   return (
     <>
       <div className="bg-mesh"></div>
@@ -146,7 +148,7 @@ function App() {
         </header>
 
         {/* Quick Stats Strip */}
-        {/* <section className="stats-strip">
+         <section className="stats-strip">
           <div className="card stat-card">
             <div className="stat-icon-wrapper">
               <Activity size={24} />
@@ -176,12 +178,12 @@ function App() {
               <span className="stat-label font-heading">Capacité Totale</span>
             </div>
           </div>
-        </section> */}
+        </section> 
 
         {/* Dashboard Grid */}
-        {/* <div className="dashboard-grid"> */}
+         <div className="dashboard-grid"> 
           {/* Left Panel: List & Search */}
-          {/* <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div className="controls-row">
               <h2>Parkings en Temps Réel</h2>
               
@@ -238,7 +240,7 @@ function App() {
               <div className="parking-list">
                 {filteredParkings.map((item) => {
                   const statusInfo = getStatusInfo(item.grp_statut);
-                  const available = item.grp_dispo || 0;
+                  const available = item.grp_disponible || 0;
                   const capacity = item.grp_exploitation || 1;
                   const occupancyRate = getOccupancyRate(available, capacity);
                   const isSelected = selectedParking?.grp_identifiant === item.grp_identifiant;
@@ -282,10 +284,10 @@ function App() {
                 })}
               </div>
             )}
-          </section> */}
+          </section> 
 
           {/* Right Panel: PostGIS Map Visualisation */}
-          {/* <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+           <section className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <h2>Visualisation PostGIS</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
               Positionnement géospatial des parkings nantais (données géographiques projetées).
@@ -294,7 +296,7 @@ function App() {
             <div className="map-visual">
               <div className="map-grid-overlay"></div>
               
-              {/* Display mock nodes inside the map representing coordinates 
+              {/* Display mock nodes inside the map representing coordinates */}
               {filteredParkings.slice(0, 15).map((p, index) => {
                 // Generate relative position for visualization using their coordinates or index to simulate space
                 const lat = p.location?.lat || p.geo_point_2d?.lat;
@@ -373,9 +375,9 @@ function App() {
                 </div>
               </div>
             )}
-          </section> */}
+          </section> 
         </div>
-      {/* </div> */}
+      </div> 
     </>
   );
 }
