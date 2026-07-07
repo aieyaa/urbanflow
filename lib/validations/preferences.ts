@@ -8,6 +8,8 @@ export const transportModes = [
   "voiture",
 ] as const;
 
+export type TransportMode = (typeof transportModes)[number];
+
 export const transportModeLabels: Record<(typeof transportModes)[number], string> = {
   marche: "Marche",
   velo: "Vélo",

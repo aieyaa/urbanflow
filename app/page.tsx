@@ -14,6 +14,12 @@ export default async function Home() {
       <p className="max-w-md text-lg text-zinc-600 dark:text-zinc-400">
         La mobilité urbaine intelligente pour la métropole de Nantes.
       </p>
+      <Link
+        href="/itineraire"
+        className="flex h-12 items-center justify-center rounded-full bg-foreground px-6 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+      >
+        Planifier un itinéraire
+      </Link>
       {user ? (
         <div className="flex flex-col items-center gap-4">
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
