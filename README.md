@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UrbanFlow
 
-## Getting Started
+Plateforme de mobilité urbaine intelligente pour la métropole de Nantes (PWA). 
 
-First, run the development server:
+## Architecture du projet
+
+- **Front-end + back-end** : Next.js 16 (App Router, Server Actions)
+- **Base de données + Auth** : Supabase (PostgreSQL + PostGIS + Auth + Realtime)
+- **Carte** : Leaflet.js
+- **PWA** : next-pwa
+- **Styles** : Tailwind CSS
+- **Hébergement** : Vercel + Supabase
+
+## Prérequis
+
+- Node.js v18+
+- Un projet Supabase (URL + clé anon/publishable)
+
+## Démarrage rapide
+
+```bash
+npm install
+```
+
+Créer un fichier `.env` à la racine avec les clés de ton projet Supabase (Project Settings → API) :
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_xxxxx
+```
+
+Lancer le serveur de développement :
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrir [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Schéma de base de données requis
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`auth.users` (géré par Supabase), 
+la table `profiles` (préférences de mobilité) doit être créée manuellement.
 
-## Learn More
+## Fonctionnalités
 
-To learn more about Next.js, take a look at the following resources:
+- `/signup` : inscription par email + mot de passe, consentement RGPD, email de confirmation Supabase
+- `/login` : connexion, session persistante (JWT + refresh token géré par Supabase)
+- `/preferences` : configuration des préférences de mobilité (modes de transport, critère d'optimisation, accessibilité PMR), route protégée
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Endpoints API (prévus, Sprint 3 — non encore implémentés)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Intégrations futures 
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- API Nantes Métropole (parkings publics, disponibilités)
+- GTFS Naolib (horaires temps réel transports en commun)
+- Calculs IA : distance, temps, itinéraires multimodaux 
+- Empreinte carbone
