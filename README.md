@@ -39,20 +39,18 @@ Ouvrir [http://localhost:3000](http://localhost:3000).
 
 ### Schéma de base de données requis
 
-`auth.users` (géré par Supabase), 
-la table `profiles` (préférences de mobilité) doit être créée manuellement.
+`auth.users` (géré par Supabase), les tables suivantes doivent être créées manuellement dans l'éditeur SQL Supabase :
+
+`profiles` (préférences de mobilité).
+
+`trips` (historique des trajets choisis, pour le bilan carbone) :
+
 
 ## Fonctionnalités
 
 - `/signup` : inscription par email + mot de passe, consentement RGPD, email de confirmation Supabase
 - `/login` : connexion, session persistante (JWT + refresh token géré par Supabase)
 - `/preferences` : configuration des préférences de mobilité (modes de transport, critère d'optimisation, accessibilité PMR), route protégée
-
-## Endpoints API (prévus, Sprint 3 — non encore implémentés)
-
-### Intégrations futures 
-
-- API Nantes Métropole (parkings publics, disponibilités)
-- GTFS Naolib (horaires temps réel transports en commun)
-- Calculs IA : distance, temps, itinéraires multimodaux 
-- Empreinte carbone
+- `/itineraire` : planificateur multimodal (marche, vélo, trottinette, transports en commun, voiture) via OpenRouteService, avec CO2 estimé par mode
+- `/parkings` : disponibilité en temps réel des parkings publics Naolib (Open Data Nantes Métropole)
+- `/bilan-carbone` : historique des trajets choisis, CO2 émis/économisé (semaine/mois) et graphique d'évolution, route protégée

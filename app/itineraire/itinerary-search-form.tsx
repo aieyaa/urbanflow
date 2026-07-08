@@ -2,7 +2,8 @@
 
 import { useActionState, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { searchItineraries } from "@/app/actions/itinerary";
+import { searchItineraries, type ItineraryResult } from "@/app/actions/itinerary";
+import { logTrip } from "@/app/actions/trips";
 import { transportModeLabels, type TransportMode } from "@/lib/validations/preferences";
 
 const RouteMap = dynamic(() => import("./route-map"), { ssr: false });
@@ -139,10 +140,32 @@ function formatDistance(meters: number) {
   return meters >= 1000 ? `${(meters / 1000).toFixed(1)} km` : `${Math.round(meters)} m`;
 }
 
+type TripLogState = { status: "idle" | "pending" | "done" | "error"; message?: string };
+
 export function ItinerarySearchForm() {
   const [state, action, pending] = useActionState(searchItineraries, undefined);
   const [origin, setOrigin] = useState<Suggestion | null>(null);
   const [destination, setDestination] = useState<Suggestion | null>(null);
+  const [tripLogs, setTripLogs] = useState<Partial<Record<TransportMode, TripLogState>>>({});
+
+  async function handleChooseTrip(result: ItineraryResult) {
+    setTripLogs((prev) => ({ ...prev, [result.mode]: { status: "pending" } }));
+
+    const response = await logTrip({
+      mode: result.mode,
+      distanceMeters: result.distanceMeters,
+      durationSeconds: result.durationSeconds,
+      carbonGrams: result.carbonGrams,
+    });
+
+    setTripLogs((prev) => ({
+      ...prev,
+      [result.mode]: {
+        status: response.success ? "done" : "error",
+        message: response.message,
+      },
+    }));
+  }
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
@@ -176,24 +199,51 @@ export function ItinerarySearchForm() {
             results={state.results}
           />
           <ul className="flex flex-col gap-2">
-            {state.results.map((result) => (
-              <li
-                key={result.mode}
-                className="flex items-center justify-between rounded-md border border-black/[.1] px-4 py-3 text-sm dark:border-white/[.15]"
-              >
-                <span className="font-medium">
-                  {transportModeLabels[result.mode as TransportMode]}
-                  {result.approximate && (
-                    <span className="ml-1 text-xs font-normal text-zinc-500 dark:text-zinc-400">
-                      (estimation)
+            {state.results.map((result) => {
+              const tripLog = tripLogs[result.mode] ?? { status: "idle" as const };
+
+              return (
+                <li
+                  key={result.mode}
+                  className="flex flex-col gap-2 rounded-md border border-black/[.1] px-4 py-3 text-sm dark:border-white/[.15]"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">
+                      {transportModeLabels[result.mode as TransportMode]}
+                      {result.approximate && (
+                        <span className="ml-1 text-xs font-normal text-zinc-500 dark:text-zinc-400">
+                          (estimation)
+                        </span>
+                      )}
                     </span>
-                  )}
-                </span>
-                <span>{formatDuration(result.durationSeconds)}</span>
-                <span>{formatDistance(result.distanceMeters)}</span>
-                <span>{result.carbonGrams} g CO2</span>
-              </li>
-            ))}
+                    <span>{formatDuration(result.durationSeconds)}</span>
+                    <span>{formatDistance(result.distanceMeters)}</span>
+                    <span>{result.carbonGrams} g CO2</span>
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    {tripLog.status === "done" ? (
+                      <span className="text-xs text-green-600 dark:text-green-400">
+                        ✓ Trajet enregistré
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleChooseTrip(result)}
+                        disabled={tripLog.status === "pending"}
+                        className="rounded-full border border-black/[.1] px-3 py-1 text-xs transition-colors hover:bg-black/[.04] disabled:opacity-50 dark:border-white/[.15] dark:hover:bg-white/[.08]"
+                      >
+                        {tripLog.status === "pending" ? "..." : "Choisir ce trajet"}
+                      </button>
+                    )}
+                    {tripLog.status === "error" && tripLog.message && (
+                      <span className="text-xs text-red-600 dark:text-red-400">
+                        {tripLog.message}
+                      </span>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
           {state.unavailableModes && state.unavailableModes.length > 0 && (
             <p className="text-sm text-zinc-600 dark:text-zinc-400">

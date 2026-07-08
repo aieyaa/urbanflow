@@ -14,12 +14,20 @@ export default async function Home() {
       <p className="max-w-md text-lg text-zinc-600 dark:text-zinc-400">
         La mobilité urbaine intelligente pour la métropole de Nantes.
       </p>
-      <Link
-        href="/itineraire"
-        className="flex h-12 items-center justify-center rounded-full bg-foreground px-6 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
-      >
-        Planifier un itinéraire
-      </Link>
+      <div className="flex flex-col gap-4 sm:flex-row">
+        <Link
+          href="/itineraire"
+          className="flex h-12 items-center justify-center rounded-full bg-foreground px-6 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+        >
+          Planifier un itinéraire
+        </Link>
+        <Link
+          href="/parkings"
+          className="flex h-12 items-center justify-center rounded-full border border-black/[.08] px-6 transition-colors hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
+        >
+          Voir les parkings
+        </Link>
+      </div>
       {user ? (
         <div className="flex flex-col items-center gap-4">
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -31,6 +39,12 @@ export default async function Home() {
               className="flex h-12 items-center justify-center rounded-full bg-foreground px-6 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
             >
               Mes préférences
+            </Link>
+            <Link
+              href="/bilan-carbone"
+              className="flex h-12 items-center justify-center rounded-full border border-black/[.08] px-6 transition-colors hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
+            >
+              Mon bilan carbone
             </Link>
             <form action={logout}>
               <button

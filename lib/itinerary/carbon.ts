@@ -12,3 +12,10 @@ export function estimateCarbonGrams(mode: TransportMode, distanceMeters: number)
   const km = distanceMeters / 1000;
   return Math.round(EMISSION_FACTORS_G_PER_KM[mode] * km);
 }
+
+export function estimateCarbonSavedGrams(mode: TransportMode, distanceMeters: number) {
+  return Math.max(
+    0,
+    estimateCarbonGrams("voiture", distanceMeters) - estimateCarbonGrams(mode, distanceMeters)
+  );
+}
