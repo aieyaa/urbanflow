@@ -27,6 +27,12 @@ export default async function Home() {
         >
           Voir les parkings
         </Link>
+        <Link
+          href="/horaires"
+          className="flex h-12 items-center justify-center rounded-full border border-black/[.08] px-6 transition-colors hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
+        >
+          Horaires temps réel
+        </Link>
       </div>
       {user ? (
         <div className="flex flex-col items-center gap-4">

@@ -28,7 +28,6 @@ Créer un fichier `.env` à la racine avec les clés de ton projet Supabase (Pro
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_xxxxx
 ```
-
 Lancer le serveur de développement :
 
 ```bash
@@ -54,3 +53,4 @@ Ouvrir [http://localhost:3000](http://localhost:3000).
 - `/itineraire` : planificateur multimodal (marche, vélo, trottinette, transports en commun, voiture) via OpenRouteService, avec CO2 estimé par mode
 - `/parkings` : disponibilité en temps réel des parkings publics Naolib (Open Data Nantes Métropole)
 - `/bilan-carbone` : historique des trajets choisis, CO2 émis/économisé (semaine/mois) et graphique d'évolution, route protégée
+- `/horaires` : recherche d'arrêt Naolib (données GTFS statiques) puis prochains passages en temps réel (retards, perturbations réseau), nécessite `NAOLIB_API_KEY`
