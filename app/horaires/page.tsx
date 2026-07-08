@@ -1,8 +1,9 @@
 import { getServiceAlerts } from "@/lib/naolib/siri";
+import { listFavoriteStops } from "@/app/actions/favorites";
 import { StopDepartures } from "./stop-departures";
 
 export default async function HorairesPage() {
-  const alerts = await getServiceAlerts();
+  const [alerts, favoriteStops] = await Promise.all([getServiceAlerts(), listFavoriteStops()]);
 
   return (
     <div className="flex flex-1 flex-col items-center gap-8 px-6 py-16">
@@ -37,7 +38,9 @@ export default async function HorairesPage() {
           </div>
         )}
 
-        <StopDepartures />
+        <StopDepartures
+          initialFavoriteStopIds={favoriteStops.map((favorite) => favorite.stopId)}
+        />
       </div>
     </div>
   );

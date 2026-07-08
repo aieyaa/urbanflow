@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { NaolibStop } from "@/lib/naolib/stops";
 import type { Departure } from "@/lib/naolib/siri";
+import { addFavoriteStop, removeFavoriteStop } from "@/app/actions/favorites";
 
 const REFRESH_INTERVAL_MS = 60_000;
 
@@ -34,13 +35,43 @@ function DepartureRow({ departure }: { departure: Departure }) {
   );
 }
 
-export function StopDepartures() {
+type StopDeparturesProps = {
+  initialFavoriteStopIds: string[];
+};
+
+export function StopDepartures({ initialFavoriteStopIds }: StopDeparturesProps) {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<NaolibStop[]>([]);
   const [selectedStop, setSelectedStop] = useState<NaolibStop | null>(null);
   const [departures, setDepartures] = useState<Departure[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [favoriteStopIds, setFavoriteStopIds] = useState(new Set(initialFavoriteStopIds));
+  const [favoritePending, setFavoritePending] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  async function handleToggleFavorite() {
+    if (!selectedStop) return;
+    setFavoritePending(true);
+
+    const isFavorite = favoriteStopIds.has(selectedStop.id);
+    const response = isFavorite
+      ? await removeFavoriteStop(selectedStop.id)
+      : await addFavoriteStop(selectedStop.id, selectedStop.name);
+
+    if (response.success) {
+      setFavoriteStopIds((prev) => {
+        const next = new Set(prev);
+        if (isFavorite) {
+          next.delete(selectedStop.id);
+        } else {
+          next.add(selectedStop.id);
+        }
+        return next;
+      });
+    }
+
+    setFavoritePending(false);
+  }
 
   function handleChange(value: string) {
     setQuery(value);
@@ -127,6 +158,17 @@ export function StopDepartures() {
 
       {selectedStop && (
         <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <h2 className="font-medium">{selectedStop.name}</h2>
+            <button
+              type="button"
+              onClick={handleToggleFavorite}
+              disabled={favoritePending}
+              className="rounded-full border border-black/[.1] px-3 py-1 text-xs transition-colors hover:bg-black/[.04] disabled:opacity-50 dark:border-white/[.15] dark:hover:bg-white/[.08]"
+            >
+              {favoriteStopIds.has(selectedStop.id) ? "★ Favori" : "☆ Ajouter aux favoris"}
+            </button>
+          </div>
           {loading && departures === null && (
             <p className="text-sm text-zinc-600 dark:text-zinc-400">Chargement...</p>
           )}
