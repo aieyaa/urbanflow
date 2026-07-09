@@ -4,20 +4,5 @@
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
-  "regions": ["cdg1"],
-  "env": {
-    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
-    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
-    "NEXT_PUBLIC_ORS_API_KEY": "@ors_api_key",
-    "NANTES_OPEN_DATA_URL": "@nantes_open_data_url",
-    "NAOLIB_GTFS_URL": "@naolib_gtfs_url",
-    "NEXT_PUBLIC_APP_URL": "@app_url"
-  },
-  "crons": [
-    {
-      "path": "/api/cron/check-disruptions",
-      "schedule": "*/15 * * * *"
-    }
-  ]
+  "regions": ["cdg1"]
 }
