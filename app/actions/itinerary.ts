@@ -41,20 +41,26 @@ export type ItinerarySearchState =
     }
   | undefined;
 
+function parseCoord(value: FormDataEntryValue | null): number | null {
+  if (typeof value !== "string" || value.trim() === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export async function searchItineraries(
   _prevState: ItinerarySearchState,
   formData: FormData
 ): Promise<ItinerarySearchState> {
-  const originLat = Number(formData.get("originLat"));
-  const originLon = Number(formData.get("originLon"));
-  const destinationLat = Number(formData.get("destinationLat"));
-  const destinationLon = Number(formData.get("destinationLon"));
+  const originLat = parseCoord(formData.get("originLat"));
+  const originLon = parseCoord(formData.get("originLon"));
+  const destinationLat = parseCoord(formData.get("destinationLat"));
+  const destinationLon = parseCoord(formData.get("destinationLon"));
 
   if (
-    !Number.isFinite(originLat) ||
-    !Number.isFinite(originLon) ||
-    !Number.isFinite(destinationLat) ||
-    !Number.isFinite(destinationLon)
+    originLat === null ||
+    originLon === null ||
+    destinationLat === null ||
+    destinationLon === null
   ) {
     return {
       message:
