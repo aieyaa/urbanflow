@@ -15,51 +15,12 @@ export default async function Home() {
         La mobilité urbaine intelligente pour la métropole de Nantes.
       </p>
       <div className="flex flex-col gap-4 sm:flex-row">
-        <Link
-          href="/itineraire"
-          className="flex h-12 items-center justify-center rounded-full bg-foreground px-6 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
-        >
-          Planifier un itinéraire
-        </Link>
-        <Link
-          href="/parkings"
-          className="flex h-12 items-center justify-center rounded-full border border-black/[.08] px-6 transition-colors hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
-        >
-          Voir les parkings
-        </Link>
-        <Link
-          href="/horaires"
-          className="flex h-12 items-center justify-center rounded-full border border-black/[.08] px-6 transition-colors hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
-        >
-          Horaires temps réel
-        </Link>
+<p>...</p>
       </div>
       {user ? (
         <div className="flex flex-col items-center gap-4">
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Connecté en tant que <span className="font-medium">{user.email}</span>
-          </p>
           <div className="flex flex-col gap-4 sm:flex-row">
-            <Link
-              href="/preferences"
-              className="flex h-12 items-center justify-center rounded-full bg-foreground px-6 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
-            >
-              Mes préférences
-            </Link>
-            <Link
-              href="/bilan-carbone"
-              className="flex h-12 items-center justify-center rounded-full border border-black/[.08] px-6 transition-colors hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
-            >
-              Mon bilan carbone
-            </Link>
-            <form action={logout}>
-              <button
-                type="submit"
-                className="flex h-12 w-full items-center justify-center rounded-full border border-black/[.08] px-6 transition-colors hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a]"
-              >
-                Se déconnecter
-              </button>
-            </form>
+<p>...</p>
           </div>
         </div>
       ) : (
