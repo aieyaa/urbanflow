@@ -1,0 +1,16 @@
+{
+  "name": "UrbanFlow",
+  "short_name": "UrbanFlow",
+  "description": "Mobilité urbaine intelligente pour la métropole de Nantes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#171717",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
