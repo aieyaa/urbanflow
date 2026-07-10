@@ -147,6 +147,7 @@ export function ItinerarySearchForm() {
   const [origin, setOrigin] = useState<Suggestion | null>(null);
   const [destination, setDestination] = useState<Suggestion | null>(null);
   const [tripLogs, setTripLogs] = useState<Partial<Record<TransportMode, TripLogState>>>({});
+  const [selectedMode, setSelectedMode] = useState<string | null>(null);
 
   async function handleChooseTrip(result: ItineraryResult) {
     setTripLogs((prev) => ({ ...prev, [result.mode]: { status: "pending" } }));
@@ -197,15 +198,23 @@ export function ItinerarySearchForm() {
             origin={[origin.lat, origin.lon]}
             destination={[destination.lat, destination.lon]}
             results={state.results}
+            selectedMode={selectedMode}
           />
           <ul className="flex flex-col gap-2">
             {state.results.map((result) => {
               const tripLog = tripLogs[result.mode] ?? { status: "idle" as const };
 
+              const isSelected = selectedMode === result.mode;
+
               return (
                 <li
                   key={result.mode}
-                  className="flex flex-col gap-2 rounded-md border border-black/[.1] px-4 py-3 text-sm dark:border-white/[.15]"
+                  onClick={() => setSelectedMode(result.mode)}
+                  className={`flex cursor-pointer flex-col gap-2 rounded-md border px-4 py-3 text-sm transition-colors ${
+                    isSelected
+                      ? "border-black/[.3] bg-black/[.03] dark:border-white/[.4] dark:bg-white/[.06]"
+                      : "border-black/[.1] dark:border-white/[.15]"
+                  }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-medium">

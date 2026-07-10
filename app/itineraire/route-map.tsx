@@ -1,8 +1,9 @@
 "use client";
 
-import { MapContainer, TileLayer, Polyline, CircleMarker, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, useMap } from "react-leaflet";
 import { useEffect, useState } from "react";
 import type { ItineraryResult } from "@/app/actions/itinerary";
+import type { CarpoolSpot } from "@/lib/covoiturage/nantes";
 
 const MODE_COLORS: Record<string, string> = {
   marche: "#16a34a",
@@ -10,12 +11,14 @@ const MODE_COLORS: Record<string, string> = {
   trottinette: "#9333ea",
   voiture: "#dc2626",
   transport_commun: "#ca8a04",
+  covoiturage: "#0d9488",
 };
 
 type RouteMapProps = {
   origin: [number, number];
   destination: [number, number];
   results: ItineraryResult[];
+  selectedMode?: string | null;
 };
 
 function LiveUserLocation() {
@@ -44,6 +47,55 @@ function LiveUserLocation() {
   );
 }
 
+function CarpoolSpotsLayer() {
+  const [spots, setSpots] = useState<CarpoolSpot[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/covoiturage")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!cancelled) setSpots(data.spots ?? []);
+      })
+      .catch((error) => console.error("[CarpoolSpotsLayer] fetch failed", error));
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <>
+      {spots
+        .filter((spot) => spot.lat !== null && spot.lon !== null)
+        .map((spot) => (
+          <CircleMarker
+            key={spot.id}
+            center={[spot.lat!, spot.lon!]}
+            radius={7}
+            pathOptions={{
+              color: "#fff",
+              weight: 2,
+              fillColor: "#0d9488",
+              fillOpacity: 0.9,
+            }}
+          >
+            <Popup>
+              <div className="flex flex-col gap-1">
+                <span className="font-semibold">{spot.name}</span>
+                {spot.address && <span className="text-sm">{spot.address}</span>}
+                <span className="text-sm">
+                  {spot.open ? `${spot.capacity} places` : "Fermé"}
+                </span>
+              </div>
+            </Popup>
+          </CircleMarker>
+        ))}
+    </>
+  );
+}
+
 function FitBounds({ points }: { points: [number, number][] }) {
   const map = useMap();
 
@@ -56,8 +108,14 @@ function FitBounds({ points }: { points: [number, number][] }) {
   return null;
 }
 
-export default function RouteMap({ origin, destination, results }: RouteMapProps) {
-  const allPoints = [origin, destination, ...results.flatMap((r) => r.geometry)];
+export default function RouteMap({ origin, destination, results, selectedMode }: RouteMapProps) {
+  const selectedResult = selectedMode
+    ? results.find((r) => r.mode === selectedMode)
+    : undefined;
+
+  const focusPoints = selectedResult
+    ? [origin, destination, ...selectedResult.geometry]
+    : [origin, destination, ...results.flatMap((r) => r.geometry)];
 
   return (
     <MapContainer
@@ -72,15 +130,23 @@ export default function RouteMap({ origin, destination, results }: RouteMapProps
       />
       <CircleMarker center={origin} radius={8} pathOptions={{ color: "#000" }} />
       <CircleMarker center={destination} radius={8} pathOptions={{ color: "#000" }} />
-      {results.map((result) => (
-        <Polyline
-          key={result.mode}
-          positions={result.geometry}
-          pathOptions={{ color: MODE_COLORS[result.mode] ?? "#000" }}
-        />
-      ))}
+      {results.map((result) => {
+        const isSelected = !selectedMode || result.mode === selectedMode;
+        return (
+          <Polyline
+            key={result.mode}
+            positions={result.geometry}
+            pathOptions={{
+              color: MODE_COLORS[result.mode] ?? "#000",
+              weight: result.mode === selectedMode ? 6 : 3,
+              opacity: isSelected ? 1 : 0.25,
+            }}
+          />
+        );
+      })}
+      {selectedMode === "covoiturage" && <CarpoolSpotsLayer />}
       <LiveUserLocation />
-      <FitBounds points={allPoints} />
+      <FitBounds points={focusPoints} />
     </MapContainer>
   );
 }

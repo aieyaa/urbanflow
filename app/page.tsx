@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/app/actions/auth";
+import { ItinerarySearchForm } from "@/app/itineraire/itinerary-search-form";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -17,6 +18,7 @@ export default async function Home() {
       <div className="flex flex-col gap-4 sm:flex-row">
 <p>...</p>
       </div>
+      <ItinerarySearchForm />
       {user ? (
         <div className="flex flex-col items-center gap-4">
           <div className="flex flex-col gap-4 sm:flex-row">
