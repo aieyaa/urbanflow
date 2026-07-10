@@ -6,6 +6,7 @@ export const transportModes = [
   "trottinette",
   "transport_commun",
   "voiture",
+  "covoiturage",
 ] as const;
 
 export type TransportMode = (typeof transportModes)[number];
@@ -16,6 +17,7 @@ export const transportModeLabels: Record<(typeof transportModes)[number], string
   trottinette: "Trottinette",
   transport_commun: "Transports en commun",
   voiture: "Voiture",
+  covoiturage: "Covoiturage",
 };
 
 export const optimizationCriteria = ["fastest", "eco"] as const;

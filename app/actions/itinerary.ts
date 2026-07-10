@@ -11,6 +11,7 @@ const MODE_TO_ORS_PROFILE: Partial<Record<TransportMode, OrsProfile>> = {
   trottinette: "cycling-regular",
   voiture: "driving-car",
   transport_commun: "driving-car",
+  covoiturage: "driving-car",
 };
 
 const TRANSIT_DURATION_MULTIPLIER = 1.6;
@@ -22,6 +23,7 @@ const DEFAULT_MODES: TransportMode[] = [
   "trottinette",
   "transport_commun",
   "voiture",
+  "covoiturage",
 ];
 
 export type ItineraryResult = {

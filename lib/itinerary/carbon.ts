@@ -6,6 +6,7 @@ const EMISSION_FACTORS_G_PER_KM: Record<TransportMode, number> = {
   trottinette: 25,
   transport_commun: 70,
   voiture: 193,
+  covoiturage: 97,
 };
 
 export function estimateCarbonGrams(mode: TransportMode, distanceMeters: number) {

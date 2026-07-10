@@ -10,12 +10,14 @@ const MODE_COLORS: Record<string, string> = {
   trottinette: "#9333ea",
   voiture: "#dc2626",
   transport_commun: "#ca8a04",
+  covoiturage: "#0d9488",
 };
 
 type RouteMapProps = {
   origin: [number, number];
   destination: [number, number];
   results: ItineraryResult[];
+  selectedMode?: string | null;
 };
 
 function LiveUserLocation() {
@@ -56,8 +58,14 @@ function FitBounds({ points }: { points: [number, number][] }) {
   return null;
 }
 
-export default function RouteMap({ origin, destination, results }: RouteMapProps) {
-  const allPoints = [origin, destination, ...results.flatMap((r) => r.geometry)];
+export default function RouteMap({ origin, destination, results, selectedMode }: RouteMapProps) {
+  const selectedResult = selectedMode
+    ? results.find((r) => r.mode === selectedMode)
+    : undefined;
+
+  const focusPoints = selectedResult
+    ? [origin, destination, ...selectedResult.geometry]
+    : [origin, destination, ...results.flatMap((r) => r.geometry)];
 
   return (
     <MapContainer
@@ -72,15 +80,22 @@ export default function RouteMap({ origin, destination, results }: RouteMapProps
       />
       <CircleMarker center={origin} radius={8} pathOptions={{ color: "#000" }} />
       <CircleMarker center={destination} radius={8} pathOptions={{ color: "#000" }} />
-      {results.map((result) => (
-        <Polyline
-          key={result.mode}
-          positions={result.geometry}
-          pathOptions={{ color: MODE_COLORS[result.mode] ?? "#000" }}
-        />
-      ))}
+      {results.map((result) => {
+        const isSelected = !selectedMode || result.mode === selectedMode;
+        return (
+          <Polyline
+            key={result.mode}
+            positions={result.geometry}
+            pathOptions={{
+              color: MODE_COLORS[result.mode] ?? "#000",
+              weight: result.mode === selectedMode ? 6 : 3,
+              opacity: isSelected ? 1 : 0.25,
+            }}
+          />
+        );
+      })}
       <LiveUserLocation />
-      <FitBounds points={allPoints} />
+      <FitBounds points={focusPoints} />
     </MapContainer>
   );
 }
