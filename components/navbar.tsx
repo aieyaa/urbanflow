@@ -7,15 +7,16 @@ import { logout } from "@/app/actions/auth";
 
 const mainLinks = [{ href: "/", label: "Accueil" }];
 
-const itineraireLinks = [
-  { href: "/itineraire", label: "Itinéraire" },
-  { href: "/parkings", label: "Parkings" },
-];
-
 const accountLinks = [
   { href: "/preferences", label: "Préférences" },
   { href: "/bilan-carbone", label: "Bilan carbone" },
 ];
+
+const dispo = [
+  { href: "/velos", label: "Vélos" },
+  { href: "/parkings", label: "Parkings" },
+];
+
 
 function NavDropdown({
   label,
@@ -186,13 +187,19 @@ export function Navbar({ user }: { user: User | null }) {
             {link.label}
           </Link>
         ))}
-        <NavDropdown label="Itinéraire" links={itineraireLinks} />
+        <Link
+          href="/itineraire"
+          className="rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-black/[.04] dark:hover:bg-white/[.08]"
+        >
+          Itinéraire
+        </Link>
         <Link
           href="/horaires"
           className="rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-black/[.04] dark:hover:bg-white/[.08]"
         >
           Horaires
         </Link>
+        <NavDropdown label="Disponibilités" links={dispo} />
         {user ? (
           <AccountDropdown user={user} />
         ) : (
@@ -239,7 +246,12 @@ export function Navbar({ user }: { user: User | null }) {
 
       {open ? (
         <div className="absolute inset-x-0 top-full flex flex-col gap-1 border-t border-black/[.08] bg-background p-4 md:hidden dark:border-white/[.145]">
-          {[...mainLinks, ...itineraireLinks, { href: "/horaires", label: "Horaires" }].map(
+          {[
+            ...mainLinks,
+            { href: "/itineraire", label: "Itinéraire" },
+            { href: "/horaires", label: "Horaires" },
+            ...dispo,
+          ].map(
             (link) => (
               <Link
                 key={link.href}
