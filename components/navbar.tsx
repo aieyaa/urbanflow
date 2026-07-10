@@ -16,6 +16,7 @@ const dispo = [
   { href: "/velos", label: "Vélos" },
   { href: "/parkings", label: "Parkings" },
   { href: "/covoiturage", label: "Covoiturage" },
+  { href: "/trottinettes", label: "Trottinettes" },
 ];
 
 
