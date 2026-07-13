@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getRoute, type OrsProfile } from "@/lib/ors/directions";
+import { getRoute, type OrsProfile, type RouteStep } from "@/lib/ors/directions";
 import { estimateCarbonGrams } from "@/lib/itinerary/carbon";
 import type { TransportMode } from "@/lib/validations/preferences";
 
@@ -32,6 +32,7 @@ export type ItineraryResult = {
   durationSeconds: number;
   carbonGrams: number;
   geometry: [number, number][];
+  steps: RouteStep[];
   approximate?: boolean;
 };
 
@@ -119,6 +120,7 @@ export async function searchItineraries(
       durationSeconds,
       carbonGrams: estimateCarbonGrams(mode, route.distanceMeters),
       geometry: route.geometry,
+      steps: route.steps,
       approximate: isTransit,
     });
   }

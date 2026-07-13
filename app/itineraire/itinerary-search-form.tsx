@@ -1,10 +1,17 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { searchItineraries, type ItineraryResult } from "@/app/actions/itinerary";
 import { logTrip } from "@/app/actions/trips";
+import {
+  deleteDailyTrip,
+  listDailyTrips,
+  saveDailyTrip,
+  type DailyTrip,
+} from "@/app/actions/daily-trips";
 import { transportModeLabels, type TransportMode } from "@/lib/validations/preferences";
+import { NavigationPanel } from "./navigation-panel";
 
 const RouteMap = dynamic(() => import("./route-map"), { ssr: false });
 
@@ -15,13 +22,15 @@ function AddressField({
   label,
   onSelect,
   locatable,
+  initialValue,
 }: {
   name: string;
   label: string;
   onSelect: (suggestion: Suggestion | null) => void;
   locatable?: boolean;
+  initialValue?: Suggestion;
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialValue?.label ?? "");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
@@ -148,6 +157,48 @@ export function ItinerarySearchForm() {
   const [destination, setDestination] = useState<Suggestion | null>(null);
   const [tripLogs, setTripLogs] = useState<Partial<Record<TransportMode, TripLogState>>>({});
   const [selectedMode, setSelectedMode] = useState<string | null>(null);
+  const [navigatingMode, setNavigatingMode] = useState<string | null>(null);
+  const [dailyTrips, setDailyTrips] = useState<DailyTrip[]>([]);
+  const [presetKey, setPresetKey] = useState(0);
+  const [dailyTripLabel, setDailyTripLabel] = useState("");
+  const [savingDailyTrip, setSavingDailyTrip] = useState(false);
+  const [dailyTripMessage, setDailyTripMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    listDailyTrips().then(setDailyTrips);
+  }, []);
+
+  function handlePickDailyTrip(trip: DailyTrip) {
+    setOrigin(trip.origin);
+    setDestination(trip.destination);
+    setPresetKey((key) => key + 1);
+  }
+
+  async function handleSaveDailyTrip() {
+    if (!origin || !destination) return;
+
+    setSavingDailyTrip(true);
+    setDailyTripMessage(null);
+
+    const response = await saveDailyTrip({
+      label: dailyTripLabel || `${origin.label} → ${destination.label}`,
+      origin,
+      destination,
+    });
+
+    setSavingDailyTrip(false);
+    setDailyTripMessage(response.message ?? (response.success ? "Trajet enregistré." : null));
+
+    if (response.success) {
+      setDailyTripLabel("");
+      listDailyTrips().then(setDailyTrips);
+    }
+  }
+
+  async function handleDeleteDailyTrip(id: string) {
+    setDailyTrips((prev) => prev.filter((trip) => trip.id !== id));
+    await deleteDailyTrip(id);
+  }
 
   async function handleChooseTrip(result: ItineraryResult) {
     setTripLogs((prev) => ({ ...prev, [result.mode]: { status: "pending" } }));
@@ -170,9 +221,52 @@ export function ItinerarySearchForm() {
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
+      {dailyTrips.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium">Trajets quotidiens</span>
+          <ul className="flex flex-wrap gap-2">
+            {dailyTrips.map((trip) => (
+              <li
+                key={trip.id}
+                className="flex items-center gap-2 rounded-full border border-black/[.1] px-3 py-1 text-sm dark:border-white/[.15]"
+              >
+                <button
+                  type="button"
+                  onClick={() => handlePickDailyTrip(trip)}
+                  className="hover:underline"
+                >
+                  {trip.label}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteDailyTrip(trip.id)}
+                  title="Supprimer"
+                  className="text-zinc-500 hover:text-red-600 dark:hover:text-red-400"
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <form action={action} className="flex flex-col gap-4">
-        <AddressField name="origin" label="Départ" onSelect={setOrigin} locatable />
-        <AddressField name="destination" label="Arrivée" onSelect={setDestination} />
+        <AddressField
+          key={`origin-${presetKey}`}
+          name="origin"
+          label="Départ"
+          onSelect={setOrigin}
+          initialValue={origin ?? undefined}
+          locatable
+        />
+        <AddressField
+          key={`destination-${presetKey}`}
+          name="destination"
+          label="Arrivée"
+          onSelect={setDestination}
+          initialValue={destination ?? undefined}
+        />
 
         <input type="hidden" name="originLat" value={origin?.lat ?? ""} />
         <input type="hidden" name="originLon" value={origin?.lon ?? ""} />
@@ -192,7 +286,44 @@ export function ItinerarySearchForm() {
         </button>
       </form>
 
-      {state?.results && state.results.length > 0 && origin && destination && (
+      {origin && destination && (
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="text"
+            value={dailyTripLabel}
+            onChange={(event) => setDailyTripLabel(event.target.value)}
+            placeholder="Nom du trajet (ex. Domicile → Travail)"
+            className="flex-1 rounded-md border border-black/[.1] bg-transparent px-3 py-2 text-sm dark:border-white/[.15]"
+          />
+          <button
+            type="button"
+            onClick={handleSaveDailyTrip}
+            disabled={savingDailyTrip}
+            className="rounded-full border border-black/[.1] px-3 py-2 text-sm transition-colors hover:bg-black/[.04] disabled:opacity-50 dark:border-white/[.15] dark:hover:bg-white/[.08]"
+          >
+            {savingDailyTrip ? "..." : "Enregistrer ce trajet quotidien"}
+          </button>
+          {dailyTripMessage && (
+            <span className="text-sm text-zinc-600 dark:text-zinc-400">{dailyTripMessage}</span>
+          )}
+        </div>
+      )}
+
+      {state?.results && state.results.length > 0 && origin && destination && navigatingMode && (
+        (() => {
+          const navigatingResult = state.results.find((r) => r.mode === navigatingMode);
+          return navigatingResult ? (
+            <NavigationPanel
+              origin={[origin.lat, origin.lon]}
+              destination={[destination.lat, destination.lon]}
+              result={navigatingResult}
+              onExit={() => setNavigatingMode(null)}
+            />
+          ) : null;
+        })()
+      )}
+
+      {state?.results && state.results.length > 0 && origin && destination && !navigatingMode && (
         <div className="flex flex-col gap-4">
           <RouteMap
             origin={[origin.lat, origin.lon]}
@@ -230,6 +361,17 @@ export function ItinerarySearchForm() {
                     <span>{result.carbonGrams} g CO2</span>
                   </div>
                   <div className="flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setSelectedMode(result.mode);
+                        setNavigatingMode(result.mode);
+                      }}
+                      className="rounded-full border border-black/[.1] px-3 py-1 text-xs transition-colors hover:bg-black/[.04] dark:border-white/[.15] dark:hover:bg-white/[.08]"
+                    >
+                      Naviguer
+                    </button>
                     {tripLog.status === "done" ? (
                       <span className="text-xs text-green-600 dark:text-green-400">
                         ✓ Trajet enregistré
