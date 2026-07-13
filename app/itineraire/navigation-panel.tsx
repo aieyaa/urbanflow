@@ -38,7 +38,10 @@ export function NavigationPanel({ origin, destination, result, onExit }: Navigat
     }
 
     const watchId = navigator.geolocation.watchPosition(
-      (pos) => setPosition([pos.coords.latitude, pos.coords.longitude]),
+      (pos) => {
+        setPosition([pos.coords.latitude, pos.coords.longitude]);
+        setGeoError(null);
+      },
       () =>
         setGeoError(
           "Impossible de suivre votre position. Vérifiez que la géolocalisation est autorisée."
