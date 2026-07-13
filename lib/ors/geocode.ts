@@ -6,7 +6,8 @@ export type GeocodeSuggestion = {
   lon: number;
 };
 
-const ORS_GEOCODE_URL = "https://api.openrouteservice.org/geocode/autocomplete";
+const BAN_SEARCH_URL = "https://api-adresse.data.gouv.fr/search/";
+const BAN_REVERSE_URL = "https://api-adresse.data.gouv.fr/reverse/";
 const NANTES_FOCUS = { lat: 47.2184, lon: -1.5536 };
 
 export async function autocompleteAddress(
@@ -16,17 +17,16 @@ export async function autocompleteAddress(
     return [];
   }
 
-  const url = new URL(ORS_GEOCODE_URL);
-  url.searchParams.set("api_key", process.env.ORS_API_KEY!);
-  url.searchParams.set("text", query);
-  url.searchParams.set("focus.point.lat", String(NANTES_FOCUS.lat));
-  url.searchParams.set("focus.point.lon", String(NANTES_FOCUS.lon));
-  url.searchParams.set("size", "5");
+  const url = new URL(BAN_SEARCH_URL);
+  url.searchParams.set("q", query);
+  url.searchParams.set("lat", String(NANTES_FOCUS.lat));
+  url.searchParams.set("lon", String(NANTES_FOCUS.lon));
+  url.searchParams.set("limit", "5");
 
   const response = await fetch(url, { cache: "no-store" });
 
   if (!response.ok) {
-    console.error("[autocompleteAddress] ORS error", response.status, await response.text());
+    console.error("[autocompleteAddress] BAN error", response.status, await response.text());
     return [];
   }
 
@@ -44,22 +44,18 @@ export async function autocompleteAddress(
   );
 }
 
-const ORS_REVERSE_GEOCODE_URL = "https://api.openrouteservice.org/geocode/reverse";
-
 export async function reverseGeocode(
   lat: number,
   lon: number
 ): Promise<string | null> {
-  const url = new URL(ORS_REVERSE_GEOCODE_URL);
-  url.searchParams.set("api_key", process.env.ORS_API_KEY!);
-  url.searchParams.set("point.lat", String(lat));
-  url.searchParams.set("point.lon", String(lon));
-  url.searchParams.set("size", "1");
+  const url = new URL(BAN_REVERSE_URL);
+  url.searchParams.set("lat", String(lat));
+  url.searchParams.set("lon", String(lon));
 
   const response = await fetch(url, { cache: "no-store" });
 
   if (!response.ok) {
-    console.error("[reverseGeocode] ORS error", response.status, await response.text());
+    console.error("[reverseGeocode] BAN error", response.status, await response.text());
     return null;
   }
 
