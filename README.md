@@ -47,6 +47,8 @@ Ouvrir [http://localhost:3000](http://localhost:3000).
 
 `favorite_stops`, `push_subscriptions`, `sent_alert_notifications` (arrêts favoris et alertes push de perturbation, voir US9).
 
+`signalements`, `signalement_confirmations` (signalements collaboratifs de problèmes de voirie/transport et confirmations par les usagers), voir le schéma SQL détaillé dans le plan d'implémentation.
+
 ## Fonctionnalités
 
 - `/signup` : inscription par email + mot de passe, consentement RGPD, email de confirmation Supabase
@@ -56,3 +58,4 @@ Ouvrir [http://localhost:3000](http://localhost:3000).
 - `/parkings` : disponibilité en temps réel des parkings publics Naolib (Open Data Nantes Métropole)
 - `/bilan-carbone` : historique des trajets choisis, CO2 émis/économisé (semaine/mois) et graphique d'évolution, route protégée
 - `/horaires` : recherche d'arrêt Naolib (données GTFS statiques) puis prochains passages en temps réel (retards, perturbations réseau)
+- `/signalements` : signalement collaboratif de problèmes de voirie et de transport en commun (bouchons, chaussée dégradée, feu cassé, arrêt inaccessible, incident de ligne...), filtres, confirmations, route protégée 

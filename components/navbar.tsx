@@ -202,6 +202,12 @@ export function Navbar({ user }: { user: User | null }) {
         >
           Horaires
         </Link>
+        <Link
+          href="/signalements"
+          className="rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-black/[.04] dark:hover:bg-white/[.08]"
+        >
+          Signalements
+        </Link>
         <NavDropdown label="Disponibilités" links={dispo} />
         {user ? (
           <AccountDropdown user={user} />
@@ -253,6 +259,7 @@ export function Navbar({ user }: { user: User | null }) {
             ...mainLinks,
             { href: "/itineraire", label: "Itinéraire" },
             { href: "/horaires", label: "Horaires" },
+            { href: "/signalements", label: "Signalements" },
             ...dispo,
           ].map(
             (link) => (
