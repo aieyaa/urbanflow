@@ -143,11 +143,11 @@ export default function ParkingMap({ initialParkings }: ParkingMapProps) {
                 {spot.address && <span className="text-sm">{spot.address}</span>}
                 <span className="text-sm">{statusLabel(spot)}</span>
                 {spot.status === 5 && (
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-zinc-600 dark:text-zinc-400">
                     Capacité totale : {spot.capacity} places
                   </span>
                 )}
-                {spot.pmrAccess && <span className="text-xs text-zinc-500">Accès PMR</span>}
+                {spot.pmrAccess && <span className="text-xs text-zinc-600 dark:text-zinc-400">Accès PMR</span>}
               </div>
             </Popup>
           </CircleMarker>
@@ -220,7 +220,7 @@ export default function ParkingMap({ initialParkings }: ParkingMapProps) {
       )}
 
       {unlocated.length > 0 && (
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-zinc-600 dark:text-zinc-400">
           Localisation indisponible pour {unlocated.map((p) => p.name).join(", ")} — affichés
           uniquement dans la liste.
         </p>

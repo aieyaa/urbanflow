@@ -111,6 +111,7 @@ function AddressField({
             onClick={handleUseMyLocation}
             disabled={locating}
             title="Utiliser ma position"
+            aria-label="Utiliser ma position"
             className="shrink-0 rounded-md border border-black/[.1] px-3 text-sm transition-colors hover:bg-black/[.04] disabled:opacity-50 dark:border-white/[.15] dark:hover:bg-white/[.08]"
           >
             {locating ? "..." : "📍"}
@@ -241,7 +242,8 @@ export function ItinerarySearchForm() {
                   type="button"
                   onClick={() => handleDeleteDailyTrip(trip.id)}
                   title="Supprimer"
-                  className="text-zinc-500 hover:text-red-600 dark:hover:text-red-400"
+                  aria-label={`Supprimer le trajet ${trip.label}`}
+                  className="text-zinc-600 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
                 >
                   ×
                 </button>
@@ -340,7 +342,16 @@ export function ItinerarySearchForm() {
               return (
                 <li
                   key={result.mode}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={isSelected}
                   onClick={() => setSelectedMode(result.mode)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setSelectedMode(result.mode);
+                    }
+                  }}
                   className={`flex cursor-pointer flex-col gap-2 rounded-md border px-4 py-3 text-sm transition-colors ${
                     isSelected
                       ? "border-black/[.3] bg-black/[.03] dark:border-white/[.4] dark:bg-white/[.06]"
@@ -351,7 +362,7 @@ export function ItinerarySearchForm() {
                     <span className="font-medium">
                       {transportModeLabels[result.mode as TransportMode]}
                       {result.approximate && (
-                        <span className="ml-1 text-xs font-normal text-zinc-500 dark:text-zinc-400">
+                        <span className="ml-1 text-xs font-normal text-zinc-600 dark:text-zinc-400">
                           (estimation)
                         </span>
                       )}

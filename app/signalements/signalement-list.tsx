@@ -73,7 +73,7 @@ export function SignalementList({
             {signalement.locationLabel}
             {signalement.lineName ? ` · ${signalement.lineName}` : ""}
           </p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-500">
+          <p className="text-xs text-zinc-600 dark:text-zinc-400">
             Signalé le {formatDate(signalement.createdAt)}
           </p>
 

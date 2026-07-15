@@ -23,7 +23,7 @@ function DepartureRow({ departure }: { departure: Departure }) {
       <div className="flex flex-col items-end">
         <span>{formatTime(displayTime)}</span>
         {!departure.isRealtime && (
-          <span className="text-xs text-zinc-500">horaire théorique</span>
+          <span className="text-xs text-zinc-600 dark:text-zinc-400">horaire théorique</span>
         )}
         {departure.isRealtime && departure.delayMinutes > 1 && (
           <span className="text-xs text-orange-600 dark:text-orange-400">

@@ -244,6 +244,7 @@ export function Navbar({ user }: { user: User | null }) {
           stroke="currentColor"
           strokeWidth="1.5"
           strokeLinecap="round"
+          aria-hidden="true"
         >
           {open ? (
             <path d="M5 5l10 10M15 5L5 15" />

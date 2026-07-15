@@ -19,7 +19,7 @@ const STATE_STYLES: Record<string, string> = {
   Dense: "border-l-orange-600 text-orange-700 dark:text-orange-400",
   Saturé: "border-l-red-600 text-red-700 dark:text-red-400",
   Bloqué: "border-l-red-900 text-red-900 dark:text-red-500",
-  Indéterminé: "border-l-zinc-400 text-zinc-500 dark:text-zinc-400",
+  Indéterminé: "border-l-zinc-500 text-zinc-600 dark:text-zinc-400",
 };
 
 function formatUpdatedAt(updatedAt: string | null) {
