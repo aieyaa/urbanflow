@@ -2,12 +2,16 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import {
   signupSchema,
   loginSchema,
   type SignupFormState,
   type LoginFormState,
 } from "@/lib/validations/auth";
+
+const RATE_LIMIT_MESSAGE =
+  "Trop de tentatives. Veuillez réessayer dans quelques minutes.";
 
 export async function signup(
   _prevState: SignupFormState,
@@ -27,6 +31,16 @@ export async function signup(
   }
 
   const { email, password } = validatedFields.data;
+
+  const ip = await getClientIp();
+  const [ipAllowed, emailAllowed] = await Promise.all([
+    checkRateLimit("signup", ip),
+    checkRateLimit("signup", email),
+  ]);
+  if (!ipAllowed || !emailAllowed) {
+    return { message: RATE_LIMIT_MESSAGE };
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signUp({ email, password });
@@ -58,6 +72,16 @@ export async function login(
   }
 
   const { email, password } = validatedFields.data;
+
+  const ip = await getClientIp();
+  const [ipAllowed, emailAllowed] = await Promise.all([
+    checkRateLimit("login", ip),
+    checkRateLimit("login", email),
+  ]);
+  if (!ipAllowed || !emailAllowed) {
+    return { message: RATE_LIMIT_MESSAGE };
+  }
+
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
