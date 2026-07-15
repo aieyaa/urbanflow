@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { estimateCarbonGrams } from "@/lib/itinerary/carbon";
-import type { TransportMode } from "@/lib/validations/preferences";
+import { transportModeLabels, type TransportMode } from "@/lib/validations/preferences";
 import { CarbonDashboard, type DailyCarbon } from "./carbon-dashboard";
 
 const HISTORY_DAYS = 90;
@@ -41,7 +41,19 @@ function sumSince(trips: TripRow[], since: Date) {
   return {
     emitted: relevant.reduce((total, trip) => total + trip.carbon_grams, 0),
     saved: relevant.reduce((total, trip) => total + savedGramsForTrip(trip), 0),
+    count: relevant.length,
   };
+}
+
+function mostUsedMode(trips: TripRow[]): TransportMode | null {
+  if (trips.length === 0) return null;
+
+  const counts = new Map<TransportMode, number>();
+  for (const trip of trips) {
+    counts.set(trip.mode, (counts.get(trip.mode) ?? 0) + 1);
+  }
+
+  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
 }
 
 function buildDailySeries(trips: TripRow[]): DailyCarbon[] {
@@ -93,6 +105,10 @@ export default async function BilanCarbonePage() {
 
   const week = sumSince(tripRows, startOfWeek(new Date()));
   const month = sumSince(tripRows, startOfMonth(new Date()));
+  const monthMode = mostUsedMode(
+    tripRows.filter((trip) => new Date(trip.created_at) >= startOfMonth(new Date()))
+  );
+  const totalSaved = tripRows.reduce((total, trip) => total + savedGramsForTrip(trip), 0);
   const dailySeries = buildDailySeries(tripRows);
 
   return (
@@ -107,6 +123,8 @@ export default async function BilanCarbonePage() {
         <CarbonDashboard
           week={week}
           month={month}
+          monthModeLabel={monthMode ? transportModeLabels[monthMode] : null}
+          totalSaved={totalSaved}
           dailySeries={dailySeries}
           hasTrips={tripRows.length > 0}
         />

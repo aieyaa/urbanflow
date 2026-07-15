@@ -13,11 +13,13 @@ import {
 } from "recharts";
 
 export type DailyCarbon = { date: string; emitted: number; saved: number };
-type Totals = { emitted: number; saved: number };
+type Totals = { emitted: number; saved: number; count: number };
 
 type CarbonDashboardProps = {
   week: Totals;
   month: Totals;
+  monthModeLabel: string | null;
+  totalSaved: number;
   dailySeries: DailyCarbon[];
   hasTrips: boolean;
 };
@@ -66,7 +68,14 @@ function StatTile({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function CarbonDashboard({ week, month, dailySeries, hasTrips }: CarbonDashboardProps) {
+export function CarbonDashboard({
+  week,
+  month,
+  monthModeLabel,
+  totalSaved,
+  dailySeries,
+  hasTrips,
+}: CarbonDashboardProps) {
   const isDark = useIsDarkMode();
   const colors = isDark ? COLORS.dark : COLORS.light;
 
@@ -80,6 +89,17 @@ export function CarbonDashboard({ week, month, dailySeries, hasTrips }: CarbonDa
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+          Récapitulatif du mois
+        </h2>
+        <div className="grid grid-cols-3 gap-3">
+          <StatTile label="Trajets ce mois" value={String(month.count)} />
+          <StatTile label="CO2 économisé (total)" value={formatGrams(totalSaved)} />
+          <StatTile label="Mode le plus utilisé" value={monthModeLabel ?? "—"} />
+        </div>
+      </div>
+
       <div className="flex flex-col gap-2">
         <h2 className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Cette semaine</h2>
         <div className="grid grid-cols-2 gap-3">
