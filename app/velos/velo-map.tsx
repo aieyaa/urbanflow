@@ -131,7 +131,7 @@ export default function VeloMap({ initialStations }: VeloMapProps) {
                 <span className="font-semibold">{station.name}</span>
                 {station.address && <span className="text-sm">{station.address}</span>}
                 <span className="text-sm">{statusLabel(station)}</span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-zinc-600 dark:text-zinc-400">
                   {station.docksAvailable} place{station.docksAvailable > 1 ? "s" : ""} libre
                   {station.docksAvailable > 1 ? "s" : ""} · Capacité totale : {station.capacity}
                 </span>

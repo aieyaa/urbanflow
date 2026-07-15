@@ -107,7 +107,7 @@ export default function CovoiturageMap({ spots }: CovoiturageMapProps) {
                   {spot.open ? `${spot.capacity} places` : "Fermé"}
                 </span>
                 {spot.pmrCapacity > 0 && (
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-zinc-600 dark:text-zinc-400">
                     Dont {spot.pmrCapacity} places PMR
                   </span>
                 )}
@@ -185,7 +185,7 @@ export default function CovoiturageMap({ spots }: CovoiturageMapProps) {
       )}
 
       {unlocated.length > 0 && (
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-zinc-600 dark:text-zinc-400">
           Localisation indisponible pour {unlocated.map((s) => s.name).join(", ")} — affichés
           uniquement dans la liste.
         </p>

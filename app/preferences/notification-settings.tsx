@@ -155,7 +155,8 @@ export function NotificationSettings({ initialFavoriteStops }: NotificationSetti
                 <button
                   type="button"
                   onClick={() => handleRemoveFavorite(favorite.stopId)}
-                  className="text-xs text-zinc-500 hover:text-red-600 dark:hover:text-red-400"
+                  aria-label={`Retirer ${favorite.stopName} des arrêts favoris`}
+                  className="text-xs text-zinc-600 hover:text-red-600 dark:text-zinc-400 dark:hover:text-red-400"
                 >
                   Retirer
                 </button>

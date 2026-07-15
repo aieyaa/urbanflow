@@ -54,7 +54,7 @@ export function Footer() {
           ))}
         </div>
       </div>
-      <p className="mx-auto mt-8 max-w-5xl text-xs text-zinc-500 dark:text-zinc-500">
+      <p className="mx-auto mt-8 max-w-5xl text-xs text-zinc-600 dark:text-zinc-400">
         © {new Date().getFullYear()} UrbanFlow Nantes. Tous droits réservés. <br />
         Eléa
       </p>

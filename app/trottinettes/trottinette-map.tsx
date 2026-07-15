@@ -130,7 +130,7 @@ export default function TrottinetteMap({ initialStations }: TrottinetteMapProps)
               <div className="flex flex-col gap-1">
                 <span className="font-semibold">{station.name}</span>
                 <span className="text-sm">{statusLabel(station)}</span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-zinc-600 dark:text-zinc-400">
                   {station.docksAvailable} place{station.docksAvailable > 1 ? "s" : ""} libre
                   {station.docksAvailable > 1 ? "s" : ""} · Capacité totale : {station.capacity}
                 </span>

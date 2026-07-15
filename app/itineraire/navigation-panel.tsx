@@ -105,7 +105,7 @@ export function NavigationPanel({ origin, destination, result, onExit }: Navigat
             <span>{formatDuration(progress.remainingSeconds)}</span>
           </div>
           {!position && !geoError && (
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs text-zinc-600 dark:text-zinc-400">
               Recherche de votre position...
             </p>
           )}
