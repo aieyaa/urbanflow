@@ -6,18 +6,36 @@ import type { Departure } from "@/lib/naolib/siri";
 import { addFavoriteStop, removeFavoriteStop } from "@/app/actions/favorites";
 
 const REFRESH_INTERVAL_MS = 60_000;
+const PAGE_SIZE = 10;
 
 function formatTime(isoTime: string) {
   return new Date(isoTime).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
 
+const MODE_LABELS: Record<string, string> = {
+  tram: "Tram",
+  bus: "Bus",
+};
+
 function DepartureRow({ departure }: { departure: Departure }) {
   const displayTime = departure.expectedTime ?? departure.aimedTime;
+  const modeLabel = MODE_LABELS[departure.mode] ?? departure.mode;
 
   return (
     <li className="flex items-center justify-between gap-4 rounded-md border border-black/[.1] px-4 py-3 text-sm dark:border-white/[.15]">
       <div className="flex flex-col">
-        <span className="font-medium">{departure.line}</span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`rounded px-1.5 py-0.5 text-xs font-medium ${
+              departure.mode === "tram"
+                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+            }`}
+          >
+            {modeLabel}
+          </span>
+          <span className="font-medium">{departure.line}</span>
+        </div>
         <span className="text-zinc-600 dark:text-zinc-400">→ {departure.destination}</span>
       </div>
       <div className="flex flex-col items-end">
@@ -44,6 +62,7 @@ export function StopDepartures({ initialFavoriteStopIds }: StopDeparturesProps) 
   const [suggestions, setSuggestions] = useState<NaolibStop[]>([]);
   const [selectedStop, setSelectedStop] = useState<NaolibStop | null>(null);
   const [departures, setDepartures] = useState<Departure[] | null>(null);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [favoriteStopIds, setFavoriteStopIds] = useState(new Set(initialFavoriteStopIds));
   const [favoritePending, setFavoritePending] = useState(false);
@@ -100,6 +119,7 @@ export function StopDepartures({ initialFavoriteStopIds }: StopDeparturesProps) 
   useEffect(() => {
     if (!selectedStop) return;
 
+    setPage(0);
     let cancelled = false;
 
     async function fetchDepartures() {
@@ -109,7 +129,12 @@ export function StopDepartures({ initialFavoriteStopIds }: StopDeparturesProps) 
           `/api/naolib/departures?stopId=${encodeURIComponent(selectedStop!.id)}`
         );
         const data = await response.json();
-        if (!cancelled) setDepartures(data.departures ?? []);
+        const nextDepartures: Departure[] = data.departures ?? [];
+        if (!cancelled) {
+          setDepartures(nextDepartures);
+          const maxPage = Math.max(0, Math.ceil(nextDepartures.length / PAGE_SIZE) - 1);
+          setPage((p) => Math.min(p, maxPage));
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -178,11 +203,43 @@ export function StopDepartures({ initialFavoriteStopIds }: StopDeparturesProps) 
             </p>
           )}
           {departures !== null && departures.length > 0 && (
-            <ul className="flex flex-col gap-2">
-              {departures.map((departure, index) => (
-                <DepartureRow key={`${departure.line}-${departure.aimedTime}-${index}`} departure={departure} />
-              ))}
-            </ul>
+            <>
+              <ul className="flex flex-col gap-2">
+                {departures.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE).map((departure, index) => (
+                  <DepartureRow
+                    key={`${departure.line}-${departure.aimedTime}-${index}`}
+                    departure={departure}
+                  />
+                ))}
+              </ul>
+              {departures.length > PAGE_SIZE && (
+                <div className="flex items-center justify-between text-sm">
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                    disabled={page === 0}
+                    className="rounded-md border border-black/[.1] px-3 py-1 disabled:opacity-40 dark:border-white/[.15]"
+                  >
+                    Précédent
+                  </button>
+                  <span className="text-zinc-600 dark:text-zinc-400">
+                    Page {page + 1} / {Math.ceil(departures.length / PAGE_SIZE)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPage((p) =>
+                        Math.min(Math.ceil(departures.length / PAGE_SIZE) - 1, p + 1)
+                      )
+                    }
+                    disabled={page >= Math.ceil(departures.length / PAGE_SIZE) - 1}
+                    className="rounded-md border border-black/[.1] px-3 py-1 disabled:opacity-40 dark:border-white/[.15]"
+                  >
+                    Suivant
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

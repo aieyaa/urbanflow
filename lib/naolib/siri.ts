@@ -1,6 +1,7 @@
 import "server-only";
+import { getQuayIds } from "./stops";
 
-const NAOLIB_BASE_URL = "https://api.okina.fr/gateway/sem/realtime/siri/2.0";
+const NAOLIB_BASE_URL = "https://api.staging.okina.fr/gateway/sem/realtime/siri/2.0";
 
 export type ServiceAlert = {
   summary: string;
@@ -10,6 +11,7 @@ export type ServiceAlert = {
 export type Departure = {
   line: string;
   destination: string;
+  mode: string;
   aimedTime: string;
   expectedTime: string | null;
   isRealtime: boolean;
@@ -21,9 +23,12 @@ type SiriMonitoredCall = {
   ExpectedDepartureTime?: string;
 };
 
+type SiriLocalizedValue = { value?: string; lang?: string };
+
 type SiriMonitoredVehicleJourney = {
-  LineRef?: string;
-  DestinationName?: string;
+  LineRef?: { value?: string };
+  DestinationName?: SiriLocalizedValue[];
+  VehicleMode?: string[];
   MonitoredCall?: SiriMonitoredCall;
 };
 
@@ -40,8 +45,8 @@ type SiriStopMonitoringResponse = {
 };
 
 type SiriPtSituationElement = {
-  Summary?: string;
-  Description?: string;
+  Summary?: SiriLocalizedValue;
+  Description?: SiriLocalizedValue;
 };
 
 type SiriSituationExchangeResponse = {
@@ -84,13 +89,19 @@ async function fetchSiri<T>(service: string, params: Record<string, string> = {}
   return response.json();
 }
 
-export async function getStopDepartures(stopPointRef: string): Promise<Departure[]> {
-  const data = await fetchSiri<SiriStopMonitoringResponse>("stop-monitoring", {
-    MonitoringRef: stopPointRef,
-  });
+export async function getStopDepartures(stopPlaceId: string): Promise<Departure[]> {
+  const quayIds = await getQuayIds(stopPlaceId);
 
-  const visits =
-    data?.Siri?.ServiceDelivery?.StopMonitoringDelivery?.[0]?.MonitoredStopVisit ?? [];
+  // Okina's stop-monitoring only returns visits per platform (Quay), not per station (StopPlace).
+  const responses = await Promise.all(
+    quayIds.map((quayId) =>
+      fetchSiri<SiriStopMonitoringResponse>("stop-monitoring", { MonitoringRef: quayId })
+    )
+  );
+
+  const visits = responses.flatMap(
+    (data) => data?.Siri?.ServiceDelivery?.StopMonitoringDelivery?.[0]?.MonitoredStopVisit ?? []
+  );
 
   return visits
     .map((visit): Departure | null => {
@@ -108,8 +119,9 @@ export async function getStopDepartures(stopPointRef: string): Promise<Departure
         : 0;
 
       return {
-        line: journey.LineRef ?? "?",
-        destination: journey.DestinationName ?? "?",
+        line: journey.LineRef?.value ?? "?",
+        destination: journey.DestinationName?.[0]?.value ?? "?",
+        mode: journey.VehicleMode?.[0] ?? "?",
         aimedTime,
         expectedTime,
         isRealtime: expectedTime !== null,
@@ -128,9 +140,9 @@ export async function getServiceAlerts(): Promise<ServiceAlert[]> {
       ?.PtSituationElement ?? [];
 
   return situations
-    .filter((situation) => situation.Summary)
+    .filter((situation) => situation.Summary?.value)
     .map((situation) => ({
-      summary: situation.Summary!,
-      description: situation.Description ?? null,
+      summary: situation.Summary!.value!,
+      description: situation.Description?.value ?? null,
     }));
 }

@@ -45,12 +45,17 @@ function parseCsvLine(line: string): string[] {
   return fields;
 }
 
-async function fetchStops(): Promise<NaolibStop[]> {
+type ParsedStops = {
+  stopPlaces: NaolibStop[];
+  quaysByParent: Map<string, string[]>;
+};
+
+async function fetchStops(): Promise<ParsedStops> {
   const response = await fetch(GTFS_ZIP_URL, { cache: "no-store" });
 
   if (!response.ok) {
     console.error("[naolib/stops] GTFS download error", response.status);
-    return [];
+    return { stopPlaces: [], quaysByParent: new Map() };
   }
 
   const zip = await JSZip.loadAsync(await response.arrayBuffer());
@@ -58,7 +63,7 @@ async function fetchStops(): Promise<NaolibStop[]> {
 
   if (!stopsFile) {
     console.error("[naolib/stops] stops.txt not found in GTFS archive");
-    return [];
+    return { stopPlaces: [], quaysByParent: new Map() };
   }
 
   const content = await stopsFile.async("string");
@@ -70,36 +75,56 @@ async function fetchStops(): Promise<NaolibStop[]> {
   const latIndex = header.indexOf("stop_lat");
   const lonIndex = header.indexOf("stop_lon");
   const locationTypeIndex = header.indexOf("location_type");
+  const parentStationIndex = header.indexOf("parent_station");
 
-  const stops: NaolibStop[] = [];
+  const stopPlaces: NaolibStop[] = [];
+  const quaysByParent = new Map<string, string[]>();
 
   for (const line of lines.slice(1)) {
     const fields = parseCsvLine(line);
+    const locationType = fields[locationTypeIndex];
 
-    if (fields[locationTypeIndex] !== STOP_PLACE_LOCATION_TYPE) {
+    if (locationType === STOP_PLACE_LOCATION_TYPE) {
+      const lat = Number(fields[latIndex]);
+      const lon = Number(fields[lonIndex]);
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+        continue;
+      }
+
+      stopPlaces.push({ id: fields[idIndex], name: fields[nameIndex], lat, lon });
       continue;
     }
 
-    const lat = Number(fields[latIndex]);
-    const lon = Number(fields[lonIndex]);
-
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    const parentId = fields[parentStationIndex];
+    if (!parentId) {
       continue;
     }
 
-    stops.push({ id: fields[idIndex], name: fields[nameIndex], lat, lon });
+    const quays = quaysByParent.get(parentId) ?? [];
+    quays.push(fields[idIndex]);
+    quaysByParent.set(parentId, quays);
   }
 
-  return stops;
+  return { stopPlaces, quaysByParent };
 }
 
-let stopsCache: Promise<NaolibStop[]> | null = null;
+let stopsCache: Promise<ParsedStops> | null = null;
 
-export function getStops(): Promise<NaolibStop[]> {
+function getParsedStops(): Promise<ParsedStops> {
   if (!stopsCache) {
     stopsCache = fetchStops();
   }
   return stopsCache;
+}
+
+export async function getStops(): Promise<NaolibStop[]> {
+  return (await getParsedStops()).stopPlaces;
+}
+
+export async function getQuayIds(stopPlaceId: string): Promise<string[]> {
+  const { quaysByParent } = await getParsedStops();
+  return quaysByParent.get(stopPlaceId) ?? [];
 }
 
 function normalize(value: string): string {
